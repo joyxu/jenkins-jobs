@@ -5,7 +5,7 @@
     parameters:
         - string:
             name: ARCH_LIST
-            default: 'arm'
+            default: 'arm64'
         - string:
             name: DEFCONFIG_LIST
             default: 'defconfig'
@@ -28,21 +28,6 @@
             anonymous:
                 - job-read
                 - job-extended-read
-            khilman@kernel.org:
-                - job-read
-                - job-extended-read
-                - job-build
-                - job-cancel
-            kevin.hilman@linaro.org:
-                - job-read
-                - job-extended-read
-                - job-build
-                - job-cancel
-            milo.casagrande@linaro.org:
-                - job-read
-                - job-extended-read
-                - job-build
-                - job-cancel
         - build-discarder:
             days-to-keep: 7
             num-to-keep: 30
@@ -51,17 +36,11 @@
             option: project
         - inject
     disabled: false
-    node: x86_64
     retry-count: 3
     child-workspace: .
     display-name: 'khilman - kbuilder'
     auth-token: ${AUTH_TOKEN}
     axes:
-        - axis:
-            type: slave
-            name: label
-            values:
-                - kernel_build_vps
         - axis:
             type: dynamic
             name: arch
@@ -72,10 +51,10 @@
             name: defconfig
             values:
                 - DEFCONFIG_LIST
+    execution-strategy:
+        sequential: true
     wrappers:
         - timestamps
-        - matrix-tie-parent:
-            node: x86_64
         - timeout:
             timeout: 45
     builders:
@@ -105,8 +84,8 @@
             REFSPEC=+refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}
             if [ -e ${TREE_NAME} ]; then
                 cd ${TREE_NAME} && \
-                timeout --preserve-status -k 10s 5m git fetch --tags linus && \
-                timeout --preserve-status -k 10s 5m git fetch --tags ${TREE} ${REFSPEC}
+                timeout --preserve-status -k 10s 30m git fetch --tags linus && \
+                timeout --preserve-status -k 10s 30m git fetch --tags ${TREE} ${REFSPEC}
             else
               git clone -o linus --reference ${MIRROR} https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git ${TREE_NAME}
               cd ${TREE_NAME} && \
@@ -164,7 +143,9 @@
 
             # Remove the build output (important stuff in _install_ dir)
             rm -rf build
-
+            if [ $defconfig_translated = "defconfig" ]; then
+                sudo cp -rf _install_/* /var/www/images/kernel-ci/${TREE_NAME}/
+            fi
             echo "Kernel build result: ${RC}"
             echo ${RC} > build.result
 
@@ -196,11 +177,11 @@
                 def description = manager.build.getEnvironment(manager.listener)['GIT_DESCRIBE']
                 def arch = manager.build.getEnvironment(manager.listener)['ARCH_LIST']
                 def publish = manager.build.getEnvironment(manager.listener)['PUBLISH']
-                def resultsUrl="https://kernelci.org/build/${tree_name}/kernel/${description}/"
+                def resultsUrl="http://124.250.134.52:5000/build/${tree_name}/kernel/${description}/"
 
-                def jobDescription = "&nbsp;ARCH: ${arch}"
+                def jobDescription = "ARCH: ${arch}"
                 // FIXME: resultsURL is only valid when PUBLISH = "true"
-                jobDescription = jobDescription + ",&nbsp;<a href='${resultsUrl}'>Results db</a>"
+                jobDescription = jobDescription + ", <a href='${resultsUrl}'>Results db</a>"
 
                 manager.build.setDisplayName("#" + build_number + "-" + tree_name + '/' + branch + "-" + description)
                 manager.build.setDescription(jobDescription)

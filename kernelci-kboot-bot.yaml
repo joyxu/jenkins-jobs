@@ -1,0 +1,52 @@
+- job:
+    name: kernelci-kboot-bot.yaml
+    project-type: freestyle
+    defaults: global
+    logrotate:
+        daysToKeep: 30
+        numToKeep: 30
+    properties:
+        - authorization:
+            anonymous:
+                - job-read
+                - job-extended-read
+    disabled: false
+    display-name: 'kernel ci - lava bot'
+    parameters:
+        - string:
+           default: ''
+           description: ''
+           name: TREE_NAME
+        - string:
+           default: ''
+           description: ''
+           name: GIT_DESCRIBE
+    wrappers:
+        - timestamps
+    builders:
+    - shell: |
+        #!/bin/bash
+        set -x
+
+        # local copy of build scripts
+        if [ ! -d local ]; then
+          mkdir -p local
+          (cd local; git clone -b openlab2 https://github.com/joyxu/lava-ci.git)
+        fi
+
+        (cd local/lava-ci; git pull)
+        export PATH=${WORKSPACE}/local/lava-ci:${PATH}
+
+        if [ ${ARCH_LIST} = "arm64" ]; then
+          PWD=$(pwd)
+          cd local/lava-ci
+          rm -rf jobs
+          lava-kernel-ci-job-creator.py http://124.250.134.52:808/${TREE_NAME}/${GIT_DESCRIBE}/defconfig/ --plans boot --targets D02
+          cd jobs
+          lava-job-runner.py --username default --token g43y0wtyi0m2ua7in3xtfch1m2s1dd0k97ac1fqqhqd0qblimtehqkwk8mjimsyh0jczrnaibdlb23mtn17qca6i14tcl27h7md580za5p8w81fl035b6bk1ybw26lle --server http://124.250.134.52:800/RPC2/ --stream /anonymous/plinth/ --boot results/${GIT_DESCRIBE}.json
+          lava-report.py --boot results/*.json --lab openlab2 --api http://124.250.134.52:8888/ --token 41a59aba-c663-4742-87fc-8558e3a1391b
+          rm -rf jobs
+          #rm -rf results
+          cd $PWD
+        fi
+

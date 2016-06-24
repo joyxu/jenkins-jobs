@@ -10,11 +10,6 @@
             anonymous:
                 - job-read
                 - job-extended-read
-            kevin.hilman@linaro.org:
-                - job-read
-                - job-extended-read
-                - job-build
-                - job-cancel
     parameters:
         - string:
             name: TREE_NAME
@@ -32,11 +27,10 @@
             name: RESULTS
             default: 'No Results'
     disabled: false
-    node: kci-x86_64-build-complete-01
     display-name: 'khilman - Kernel build complete'
     scm:
         - git:
-            url: https://github.com/kernelci/kernelci-build.git
+            url: https://github.com/joyxu/kernelci-build.git
             refspec: +refs/heads/master:refs/remotes/origin/master
             name: origin
             branches:
@@ -57,5 +51,5 @@
             - project: tbaker-kboot-bot
               condition: ALWAYS
               predefined-parameters: |
-                  URL=http://storage.kernelci.org/${TREE_NAME}/${GIT_DESCRIBE}/
+                  URL=http://114.119.4.74:808/${TREE_NAME}/${GIT_DESCRIBE}/
                   ARCH=${ARCH_LIST}

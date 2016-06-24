@@ -3,150 +3,43 @@
     project-type: matrix
     defaults: global
     logrotate:
-        daysToKeep: 7
-        numToKeep: 30
+        daysToKeep: 10
+        numToKeep: 50
     properties:
         - authorization:
             anonymous:
                 - job-read
                 - job-extended-read
-            khilman@kernel.org:
-                - job-read
-                - job-extended-read
-                - job-build
-                - job-cancel
         - throttle:
             max-total: 1
             option: project
         - inject
     disabled: false
-    node: kci-x86_64-build-complete-01
     child-workspace: .
     display-name: 'khilman - Trigger flex'
     triggers:
         - timed: 'H/60 * * * *'
     axes:
         - axis:
-            type: slave
-            name: label
-            values:
-                - kci-x86_64-build-complete-01
-        - axis:
             type: user-defined
             name: ARCH
             values:
-                - arm
                 - arm64
                 - x86
         - axis:
             type: user-defined
             name: TREE_BRANCH
             values:
-                - mainline#master
-                - next#master
-                - arm-soc#for-next
-                - arm-soc#to-build
-                - rmk#for-next
-                - rmk#to-build
-                - omap#for-next
-                - stable#linux-4.6.y
-                - stable#linux-4.5.y
-                - stable#linux-4.4.y
-                - stable#linux-4.2.y
-                - stable#linux-4.0.y
-                - stable#linux-3.19.y
-                - stable#linux-3.17.y
-                - stable#linux-3.16.y
-                - stable#linux-3.15.y
-                - stable#linux-3.14.y
-                - stable#linux-3.13.y
-                - stable#linux-3.12.y
-                - stable#linux-3.11.y
-                - stable#linux-3.10.y
-                - stable-sasha#linux-3.18.y-queue
-                - stable-sasha#linux-3.18.y
-                - stable-sasha#linux-4.1.y-queue
-                - stable-sasha#linux-4.1.y
-                - lsk#for-test
-                - lsk#linux-linaro-lsk-v3.10
-                - lsk#linux-linaro-lsk-v3.10-test
-                - lsk#linux-linaro-lsk-v3.10-rt
-                - lsk#linux-linaro-lsk-v3.10-rt-test
-                - lsk#linux-linaro-lsk-v3.14
-                - lsk#linux-linaro-lsk-v3.14-test
-                - lsk#linux-linaro-lsk-v3.14-rt
-                - lsk#linux-linaro-lsk-v3.14-rt-test
-                - lsk#linux-linaro-lsk-v3.18
-                - lsk#linux-linaro-lsk-v3.18-test
-                - lsk#linux-linaro-lsk-v3.18-rt
-                - lsk#linux-linaro-lsk-v3.18-rt-test
-                - lsk#linux-linaro-lsk-v3.18-android
-                - lsk#linux-linaro-lsk-v3.18-android-test
-                - lsk#linux-linaro-lsk-v3.18-eas-test
-                - lsk#linux-linaro-lsk-v4.1
-                - lsk#linux-linaro-lsk-v4.1-test
-                - lsk#linux-linaro-lsk-v4.1-rt
-                - lsk#linux-linaro-lsk-v4.1-rt-test
-                - lsk#linux-linaro-lsk-v4.1-android
-                - lsk#linux-linaro-lsk-v4.1-android-test
-                - lsk#linux-linaro-lsk-v4.4
-                - lsk#linux-linaro-lsk-v4.4-test
-                - lsk#linux-linaro-lsk-v4.4-rt
-                - lsk#linux-linaro-lsk-v4.4-rt-test
-                - lsk#linux-linaro-lsk-v4.4-android
-                - lsk#linux-linaro-lsk-v4.4-android-test
-                - stable-queue#linux-3.10.y.queue
-                - stable-queue#linux-3.14.y.queue
-                - stable-queue#linux-4.2.y.queue
-                - stable-queue#linux-4.4.y.queue
-                - stable-queue#linux-4.5.y.queue
-                - stable-queue#linux-4.6.y.queue
-                - stable-rc#linux-3.14.y
-                - stable-rc#linux-4.4.y
-                - stable-rc#linux-4.6.y
-                - khilman#to-build
-                - qcom-lt#integration-linux-qcomlt
-                - samsung#for-next
-                - dlezcano#kevin-bot
-                - tbaker#to-build
-                - collabora#for-master
-                - collabora#for-next
-                - collabora#for-kernelci
-                - rt-stable#v3.2-rt
-                - rt-stable#v3.4-rt
-                - rt-stable#v3.10-rt
-                - rt-stable#v3.12-rt
-                - tegra#for-next
-                - anders#to-build
-                - anders#v3.18-rt-test
-                - anders#v4.0-rt-test
-                - anders#v4.1-rt-test
-                - viresh#for-kernelci
-                - alex#kernel-ci
-                - krzysztof#for-next
-                - agross#for-next
-                - broonie-regmap#for-next
-                - broonie-regulator#for-next
-                - broonie-sound#for-next
-                - broonie-spi#for-next
-                - renesas#next
-                - renesas#devel
-                - llvm#for-next
-                - llvm#master
-                - ulfh#next
-                - ardb#arm32-efi-for-kernelci
-                - evalenti#for-kernelci
-                - amitk#96b-kernelci
-                - pmwg#integ
-                - net-next#master
-                - amlogic#for-next
-                - leg#leg-kernel
+                    - plinth#devm-
+                    - plinth#topic-hns-
+                    - plinth#topic-pcie-
+                    - plinth#topic-sas-
+                    - plinth#topic-roce-
+                    - plinth#topic-edac-
     execution-strategy:
         sequential: true
     wrappers:
         - timestamps
-        - matrix-tie-parent:
-            node: x86_64-01
         - timeout:
             timeout: 30
     builders:
@@ -159,44 +52,7 @@
 
             declare -A trees
             trees=(
-                [mainline]="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git"
-                [next]="https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git"
-                [arm-soc]="https://git.kernel.org/pub/scm/linux/kernel/git/arm/arm-soc.git"
-                [rmk]="git://git.armlinux.org.uk/~rmk/linux-arm.git"
-                [stable]="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git"
-                [omap]="https://git.kernel.org/pub/scm/linux/kernel/git/tmlind/linux-omap.git"
-                [linux-linaro]="https://git.linaro.org/kernel/linux-linaro-tracking.git"
-                [lsk]="https://git.linaro.org/kernel/linux-linaro-stable.git"
-                [khilman]="https://git.kernel.org/pub/scm/linux/kernel/git/khilman/linux.git"
-                [stable-queue]="git://server.roeck-us.net/git/linux-stable.git"
-                [stable-sasha]="https://git.kernel.org/pub/scm/linux/kernel/git/sashal/linux-stable.git"
-                [qcom-lt]="https://git.linaro.org/landing-teams/working/qualcomm/kernel.git"
-                [samsung]="https://git.kernel.org/pub/scm/linux/kernel/git/kgene/linux-samsung.git"
-                [dlezcano]="https://git.linaro.org/people/daniel.lezcano/linux.git"
-                [tbaker]="https://github.com/EmbeddedAndroid/linux.git"
-                [collabora]="http://cgit.collabora.com/git/linux.git"
-                [rt-stable]="https://git.kernel.org/pub/scm/linux/kernel/git/paulg/linux-stable-rt.git"
-                [tegra]="https://git.kernel.org/pub/scm/linux/kernel/git/tegra/linux.git"
-                [anders]="https://git.linaro.org/people/anders.roxell/linux-rt.git"
-                [viresh]="https://git.kernel.org/pub/scm/linux/kernel/git/vireshk/linux.git"
-                [alex]="https://git.linaro.org/people/alex.bennee/linux.git"
-                [krzysztof]="https://git.kernel.org/pub/scm/linux/kernel/git/krzk/linux.git"
-                [agross]="https://git.kernel.org/pub/scm/linux/kernel/git/agross/linux.git"
-                [broonie-regmap]="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/regmap.git"
-                [broonie-regulator]="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/regulator.git"
-                [broonie-sound]="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git"
-                [broonie-spi]="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/spi.git"
-                [renesas]="https://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git"
-                [llvm]="http://git.linuxfoundation.org/llvmlinux/kernel.git"
-                [ulfh]="https://git.linaro.org/people/ulf.hansson/mmc.git"
-                [ardb]="https://git.linaro.org/people/ard.biesheuvel/linux-arm.git"
-                [evalenti]="https://git.kernel.org/pub/scm/linux/kernel/git/evalenti/linux-soc-thermal.git"
-                [amitk]="https://git.linaro.org/people/amit.kucheria/kernel.git"
-                [pmwg]="https://git.linaro.org/power/linux.git"
-                [net-next]="git://git.kernel.org/pub/scm/linux/kernel/git/davem/net-next.git"
-                [amlogic]="https://git.kernel.org/pub/scm/linux/kernel/git/khilman/linux-amlogic.git"
-                [leg]="http://git.linaro.org/leg/acpi/leg-kernel.git"
-                [stable-rc]="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git"
+            [plinth]="git@github.com:hisilicon/kernel-dev.git"
             )
 
             OFS=${IFS}
@@ -206,8 +62,8 @@
 
             tree_name=${arr[0]}
             tree_url=${trees[$tree_name]}
-            branch=${arr[1]}
-            if [[ -z ${branch} ]]; then
+            branch_prefix=${arr[1]}
+            if [[ -z ${branch_prefix} ]]; then
               branch="master"
             fi
 
@@ -221,6 +77,8 @@
             cd $tree_name
             rm -f *.properties
             git remote update
+
+            branch=$(git for-each-ref --sort=-committerdate refs/remotes/origin | grep ${branch_prefix} | head -n 1 | sed "s/.*${branch_prefix}/${branch_prefix}/")
             git checkout -f origin/$branch
             if [ $? != 0 ]; then
               echo "ERROR: branch $branch doesn't exist"
